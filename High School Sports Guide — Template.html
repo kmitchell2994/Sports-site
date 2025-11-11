@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>High School Sports Guide — Template</title>
+  <meta name="description" content="Rules, layouts and quick guides for common high-school sports." />
+  <style>
+    :root{
+      --bg:#f7f8fb; --card:#ffffff; --muted:#6b7280; --accent:#0f172a;
+      --accent-2:#0ea5a4; --gap:16px; --radius:12px; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),#ffffff);color:#0b1220}
+    header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;background:var(--card);box-shadow:0 6px 18px rgba(12,15,25,0.06);position:sticky;top:0;z-index:10}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,var(--accent-2),#60a5fa);display:flex;align-items:center;justify-content:center;color:white;font-weight:700}
+    nav{display:flex;gap:10px;align-items:center}
+    .search{padding:8px 12px;border-radius:10px;border:1px solid #e6e9ef;background:white;min-width:200px}
+    .container{max-width:1100px;margin:28px auto;padding:0 20px}
+    .grid{display:grid;grid-template-columns:260px 1fr;gap:20px}
+    aside{position:sticky;top:82px;height:calc(100vh - 120px);overflow:auto;padding:14px;background:var(--card);border-radius:12px}
+    .sport-list{display:flex;flex-direction:column;gap:8px}
+    .sport-btn{display:flex;gap:10px;align-items:center;padding:8px;border-radius:8px;border:1px solid transparent;cursor:pointer}
+    .sport-btn:hover{background:#f3f6fb}
+    main{min-height:70vh}
+    .hero{display:flex;align-items:center;gap:18px;padding:18px;background:var(--card);border-radius:12px}
+    .hero h1{margin:0;font-size:20px}
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:18px}
+    .card{background:var(--card);padding:14px;border-radius:12px;box-shadow:0 6px 18px rgba(12,15,25,0.04)}
+    .card h3{margin:0 0 6px 0}
+    .meta{color:var(--muted);font-size:13px}
+    .layout-canvas{width:100%;height:380px;background:linear-gradient(180deg,#fff,#fbfdff);border-radius:10px;border:1px solid #eef2ff;display:flex;align-items:center;justify-content:center}
+    .section{margin-top:16px}
+    .pill{display:inline-block;padding:6px 8px;border-radius:999px;background:#eef2f2;font-size:13px;margin-right:8px}
+    footer{padding:18px;text-align:center;color:var(--muted);font-size:14px}
+    /* responsive */
+    @media (max-width:900px){.grid{grid-template-columns:1fr;}.container{padding:12px}.hero{flex-direction:column;align-items:flex-start}.logo{width:40px;height:40px}}
+    /* print */
+    @media print{header,footer,aside,.search{display:none}body{background:white} .container{max-width:100%}}
+    /* small helpers */
+    .row{display:flex;gap:12px;align-items:center}
+    .btn{padding:8px 12px;border-radius:8px;border:none;background:var(--accent-2);color:white;cursor:pointer}
+    .muted{color:var(--muted)}
+    pre{background:#0b1220;color:#dbeafe;padding:12px;border-radius:8px;overflow:auto}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">HS</div>
+      <div>
+        <div style="font-weight:700">High School Sports Guide</div>
+        <div style="font-size:12px;color:var(--muted)">Rules • Layouts • Quick-teach</div>
+      </div>
+    </div>
+    <nav>
+      <input id="searchInput" class="search" placeholder="Search sport or term..." aria-label="Search sports" />
+      <button id="printBtn" class="btn" title="Print or save as PDF">Print</button>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="grid">
+      <aside>
+        <div style="font-weight:700;margin-bottom:8px">All sports</div>
+        <div class="sport-list" id="sportList"></div>
+        <div style="margin-top:12px;color:var(--muted);font-size:13px">Tip: use the search box to filter sports. Click a sport to open its quick guide.</div>
+      </aside>
+
+      <main>
+        <div class="hero" id="hero">
+          <div style="flex:1">
+            <h1>Welcome — choose a sport to view rules and field layout</h1>
+            <div class="muted">Editable single-file template. Add or change sports in the <code>sportsData</code> object inside the script.</div>
+            <div style="margin-top:10px" id="featuredPills"></div>
+          </div>
+          <div style="width:320px">
+            <div class="card">
+              <div style="font-weight:700">Featured layout</div>
+              <div class="muted" style="font-size:13px;margin-top:6px">Quick view of the playing area for the selected sport</div>
+              <div id="layoutPreview" class="layout-canvas" style="margin-top:12px">No sport selected</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <h2 style="margin:0">Sport cards</h2>
+            <div class="muted">Click a card to open the full guide</div>
+          </div>
+
+          <div class="cards" id="cards"></div>
+        </div>
+
+        <div id="sportDetail" class="section" style="display:none">
+          <!-- Filled dynamically -->
+        </div>
+      </main>
+    </div>
+
+    <footer>
+      Built for teachers & students • Edit the file to add more sports • Use Print to save a PDF of any sport guide
+    </footer>
+  </div>
+
+  <script>
+    // --- Data store: add or edit sports here ---
+    const sportsData = {
+      soccer: {
+        id:'soccer', title:'Soccer', altTitles:['football'], category:'Ball Sports', players:'11 per side (school variations 9v9 or 7v7)',
+        equipment:['Ball (size 5)','Goals','Shin pads'],
+        summary:'Two teams try to score by getting the ball into the opponent\'s net without using hands (goalkeeper excepted).',
+        scoring:'1 goal = 1 point. Most goals wins. Extra time/penalties for finals.',
+        commonFouls:['Handball','Tripping','Kicking an opponent','Dangerous play'],
+        skills:['Passing and receiving','Dribbling','Shooting','Positioning'],
+        layoutHtml: `
+          <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+            <rect x="20" y="20" width="960" height="560" fill="#eafaf1" stroke="#8bc34a" stroke-width="6" rx="12"/>
+            <rect x="430" y="120" width="140" height="360" fill="none" stroke="#fff" stroke-width="3" />
+            <circle cx="500" cy="300" r="60" fill="none" stroke="#fff" stroke-width="3" />
+            <rect x="40" y="230" width="100" height="140" fill="none" stroke="#fff" stroke-width="3" />
+            <rect x="860" y="230" width="100" height="140" fill="none" stroke="#fff" stroke-width="3" />
+          </svg>
+        `
+      },
+      basketball: {
+        id:'basketball', title:'Basketball', category:'Ball Sports', players:'5 per side (substitutions allowed)',
+        equipment:['Basketball','Hoops (10ft)','Court with markings'],
+        summary:'Two teams score points by shooting through the opponent\'s hoop. Dribbling required while moving with the ball.',
+        scoring:'Field goal: 2 or 3 points (3-point line). Free throw: 1 point.',
+        commonFouls:['Personal foul','Traveling','Double dribble'],
+        skills:['Dribbling','Shooting','Passing','Rebounding'],
+        layoutHtml:`
+          <svg viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+            <rect x="20" y="20" width="960" height="460" rx="10" fill="#fff8ea" stroke="#f59e0b" stroke-width="6"/>
+            <rect x="200" y="80" width="600" height="340" rx="6" fill="none" stroke="#fff" stroke-width="3" />
+            <circle cx="500" cy="250" r="60" fill="none" stroke="#fff" stroke-width="3" />
+            <rect x="60" y="200" width="80" height="100" fill="none" stroke="#fff" stroke-width="3" />
+            <rect x="860" y="200" width="80" height="100" fill="none" stroke="#fff" stroke-width="3" />
+          </svg>`
+      },
+      netball: {
+        id:'netball', title:'Netball', category:'Ball Sports', players:'7 per side',
+        equipment:['Netball','Goal posts','Court shoes'],
+        summary:'Teams pass the ball to score by getting it through the goal ring. Players restricted to specific zones depending on position.',
+        scoring:'Each successful goal = 1 point',
+        commonFouls:['Contact','Obstruction','Held ball'],
+        skills:['Catching','Pivoting','Accurate passing','Shooting'],
+        layoutHtml:`
+          <svg viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+            <rect x="10" y="10" width="780" height="380" rx="8" fill="#fdf7ff" stroke="#a78bfa" stroke-width="6"/>
+            <circle cx="150" cy="200" r="70" fill="none" stroke="#fff" stroke-width="3"/>
+            <circle cx="650" cy="200" r="70" fill="none" stroke="#fff" stroke-width="3"/>
+            <line x1="400" y1="10" x2="400" y2="390" stroke="#fff" stroke-width="3" />
+          </svg>`
+      },
+      volleyball: {
+        id:'volleyball', title:'Volleyball', category:'Ball Sports', players:'6 per side (indoor)',
+        equipment:['Volleyball','Net','Court'],
+        summary:'Teams hit the ball over a net; up to three touches to return. Rally scoring in school competitions.',
+        scoring:'Rally point scoring: each rally wins a point. Sets to 25 (win by 2).',
+        commonFouls:['Net touch','Overreach','Four hits'],
+        skills:['Serving','Passing','Setting','Spiking'],
+        layoutHtml:`
+          <svg viewBox="0 0 900 400" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+            <rect x="20" y="20" width="860" height="360" rx="6" fill="#f9fbff" stroke="#60a5fa" stroke-width="6"/>
+            <line x1="450" y1="30" x2="450" y2="370" stroke="#fff" stroke-width="3" />
+            <rect x="70" y="60" width="320" height="280" fill="none" stroke="#fff" stroke-width="3"/>
+            <rect x="510" y="60" width="320" height="280" fill="none" stroke="#fff" stroke-width="3"/>
+          </svg>`
+      },
+      // add other sports as needed; for brevity, fields omitted but can be filled
+      cricket: {id:'cricket', title:'Cricket', category:'Ball Sports', players:'11 per side', equipment:['Bat','Ball','Wickets'], summary:'Batting and bowling; runs scored by batsmen.', scoring:'Runs, wickets', commonFouls:[], skills:['Batting','Bowling','Fielding'], layoutHtml:'<div style="padding:10px">Cricket pitch: 22yd straight strip; oval field</div>'},
+      tennis: {id:'tennis', title:'Tennis', category:'Racquet Sports', players:'Singles or Doubles', equipment:['Racquet','Ball'], summary:'Players hit ball over net; games/sets/match scoring', scoring:'Points -> Games -> Sets', commonFouls:[], skills:['Serve','Groundstrokes','Volley'], layoutHtml:'<div style="padding:10px">Tennis court diagram placeholder</div>'},
+      swimming: {id:'swimming', title:'Swimming', category:'Aquatics', players:'Varies', equipment:['Pool','Goggles'], summary:'Races over set distances and strokes', scoring:'Time-based', commonFouls:['False start'], skills:['Stroke technique'], layoutHtml:'<div style="padding:10px">Pool lanes diagram</div>'}
+    };
+
+    // --- UI wiring ---
+    const sportListEl = document.getElementById('sportList');
+    const cardsEl = document.getElementById('cards');
+    const layoutPreview = document.getElementById('layoutPreview');
+    const sportDetail = document.getElementById('sportDetail');
+    const searchInput = document.getElementById('searchInput');
+    const featuredPills = document.getElementById('featuredPills');
+
+    function createSportButton(s){
+      const el = document.createElement('button');
+      el.className = 'sport-btn';
+      el.innerHTML = `<div style="width:38px;height:38px;border-radius:8px;background:#eef;display:flex;align-items:center;justify-content:center;font-weight:700;color:#123">${s.title.slice(0,2).toUpperCase()}</div><div><div style="font-weight:600">${s.title}</div><div class=\"muted\">${s.category}</div></div>`;
+      el.onclick = ()=> openSport(s.id);
+      return el;
+    }
+
+    function renderList(filter=''){
+      sportListEl.innerHTML='';
+      const keys = Object.keys(sportsData).sort();
+      keys.forEach(k=>{
+        const s = sportsData[k];
+        if(filter && !(`${s.title} ${s.altTitles||''} ${s.category} ${s.summary}`.toLowerCase().includes(filter.toLowerCase()))) return;
+        sportListEl.appendChild(createSportButton(s));
+      })
+    }
+
+    function renderCards(filter=''){
+      cardsEl.innerHTML='';
+      Object.values(sportsData).forEach(s=>{
+        if(filter && !(`${s.title} ${s.altTitles||''} ${s.category} ${s.summary}`.toLowerCase().includes(filter.toLowerCase()))) return;
+        const card = document.createElement('div'); card.className='card';
+        card.innerHTML = `<h3>${s.title}</h3><div class="meta">${s.category} • ${s.players||''}</div><div style="margin-top:10px;font-size:14px">${s.summary}</div><div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center"><div class="muted">${(s.equipment||[]).slice(0,3).join(', ')}</div><button class="btn" onclick=\"openSport('${s.id}')\">Open</button></div>`;
+        cardsEl.appendChild(card);
+      })
+    }
+
+    function showLayoutFor(s){
+      layoutPreview.innerHTML = s.layoutHtml || 'Layout not available';
+    }
+
+    function openSport(id){
+      const s = sportsData[id];
+      if(!s) return;
+      // set preview
+      showLayoutFor(s);
+      // show detail
+      sportDetail.style.display='block';
+      sportDetail.innerHTML = `
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:start;gap:12px">
+            <div>
+              <h2 style="margin:0">${s.title}</h2>
+              <div class="muted">${s.category} • ${s.players||''}</div>
+            </div>
+            <div class="row">
+              <button class="btn" onclick="window.print()">Print guide</button>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 360px;gap:16px;margin-top:14px">
+            <div>
+              <div style="font-weight:700">Quick summary</div>
+              <p class="muted">${s.summary}</p>
+
+              <div style="margin-top:10px"><strong>Scoring</strong><div class="muted">${s.scoring || 'See rules'}</div></div>
+              <div style="margin-top:10px"><strong>Common fouls / penalties</strong><div class="muted">${(s.commonFouls||[]).join(', ') || 'None listed'}</div></div>
+
+              <div style="margin-top:10px"><strong>Skills emphasised at school level</strong><div class="muted">${(s.skills||[]).join(', ')}</div></div>
+
+              <div style="margin-top:10px"><strong>Suggested drills / teaching tips</strong>
+                <ul class="muted"><li>Split students into small groups for skill stations</li><li>Progress rules simplified for beginners (e.g., reduced team size)</li><li>Focus on safety & correct equipment</li></ul>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-weight:700">Equipment</div>
+              <div class="muted">${(s.equipment||[]).join(', ')}</div>
+
+              <div style="margin-top:10px;font-weight:700">Field / court</div>
+              <div class="muted" style="margin-top:8px">You can print this guide or the whole page to share with students.</div>
+              <div style="margin-top:10px;border-radius:8px;overflow:hidden">${s.layoutHtml || ''}</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // set hero pills
+      featuredPills.innerHTML = '';
+      (s.skills||[]).slice(0,4).forEach(t=>{ const p = document.createElement('span'); p.className='pill'; p.textContent = t; featuredPills.appendChild(p); });
+      // scroll to detail
+      setTimeout(()=> sportDetail.scrollIntoView({behavior:'smooth',block:'start'}),100);
+    }
+
+    // initial render
+    renderList(); renderCards();
+
+    // search wiring
+    searchInput.addEventListener('input', (e)=>{
+      const val = e.target.value.trim(); renderList(val); renderCards(val);
+    });
+
+    // print
+    document.getElementById('printBtn').addEventListener('click', ()=> window.print());
+
+    // convenience: allow openSport from inline onclick
+    window.openSport = openSport;
+
+    // Keyboard accessibility: select first sport when pressing ArrowDown in search
+    searchInput.addEventListener('keydown', (e)=>{
+      if(e.key === 'ArrowDown'){ const first = sportListEl.querySelector('.sport-btn'); if(first) first.focus(); }
+    });
+
+    // export helper (for teachers) - builds a printable text summary
+    function buildPrintableSummary(id){
+      const s = sportsData[id]; if(!s) return '';
+      return `${s.title}\n${s.category} • ${s.players||''}\n\nSummary:\n${s.summary}\n\nScoring:\n${s.scoring||''}\n\nEquipment:\n${(s.equipment||[]).join(', ')}\n\nSkills:\n${(s.skills||[]).join(', ')}`;
+    }
+
+    // optional: deep link via ?sport=slug
+    function loadFromQuery(){
+      const params = new URLSearchParams(location.search); const sport = params.get('sport'); if(sport && sportsData[sport]) openSport(sport);
+    }
+    loadFromQuery();
+
+    // small accessibility improvement: skip to content on tab
+  </script>
+</body>
+</html>
